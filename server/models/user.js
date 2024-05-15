@@ -103,3 +103,5 @@ Contact.init({
 
 Contact.belongsTo(User, { as: 'User', foreignKey: 'user_id' });
 Contact.belongsTo(User, { as: 'Contact', foreignKey: 'contact_id' });
+
+model.exports = { User, Message, Contact };
