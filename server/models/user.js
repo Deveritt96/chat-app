@@ -15,7 +15,7 @@ class User extends Model {
       return await bcrypt.compare(password, this.password);
     }
   }
-  
+
 User.init({
   id: {
     type: DataTypes.INTEGER.UNSIGNED,
