@@ -16,7 +16,7 @@ type ChatRoom {
 
 type Message {
     id: Int!
-    user_id: Int!
+    user: User!
     message: String!
     timestamp: String!
 }

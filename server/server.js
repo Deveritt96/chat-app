@@ -7,19 +7,28 @@ import * as socketIO from 'socket.io';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import cors from 'cors';
-
+import DatabaseAPI from './utils/database.js';
 
 const PORT = process.env.PORT || 4000; // use the PORT environment variable, or 4000 if it's not set
 const app = express();
 
-// Create a new Apollo Server instance
-const server = new ApolloServer({ typeDefs, resolvers });
-
 // Start the server
 (async () => {
-  await server.start();
-  server.applyMiddleware({ app });
-  app.listen({ port: PORT }, () =>
-    console.log(`Server ready at http://localhost:${PORT}${server.graphqlPath}`)
-  );
-})();
+    const databaseAPI = new DatabaseAPI();
+    await databaseAPI.init();
+  
+    // Create a new Apollo Server instance
+    const server = new ApolloServer({ 
+      typeDefs, 
+      resolvers,
+      dataSources: () => ({
+        database: databaseAPI,
+      }),
+    });
+  
+    await server.start();
+    server.applyMiddleware({ app });
+    app.listen({ port: PORT }, () =>
+      console.log(`Server ready at http://localhost:${PORT}${server.graphqlPath}`)
+    );
+  })();

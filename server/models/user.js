@@ -19,7 +19,12 @@ const User = sequelize.define('User', {
   password: {
     type: DataTypes.STRING(255),
     allowNull: false,
-}, {
+    validate: {
+      is: {
+        args: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/,
+        msg: 'Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, and one number',
+      }
+},} {
   tableName: 'users',
 });
 
@@ -34,6 +39,9 @@ const ChatRoom = sequelize.define('ChatRoom', {
     type: DataTypes.STRING(45),
     allowNull: true,
   },
+  contactId: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
 }, {
   tableName: 'chat_rooms',
 });
@@ -100,7 +108,14 @@ const Contact = sequelize.define('Contact', {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   },
-}, {
+  user1Id: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
+},
+  user2Id: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
+  },
   tableName: 'contacts',
 });
 
@@ -130,5 +145,20 @@ const UserChat = sequelize.define('UserChat', {
 }, {
   tableName: 'user_chats',
 });
+
+// Define the relationships
+Contact.belongsTo(User, { as: 'user1', foreignKey: 'user1Id' });
+Contact.belongsTo(User, { as: 'user2', foreignKey: 'user2Id' });
+User.hasMany(Contact, { foreignKey: 'user1Id' });
+User.hasMany(Contact, { foreignKey: 'user2Id' });
+
+ChatRoom.belongsTo(Contact, { foreignKey: 'contactId' });
+Contact.hasOne(ChatRoom, { foreignKey: 'contactId' });
+
+Message.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Message, { foreignKey: 'userId' });
+
+Message.belongsTo(ChatRoom, { foreignKey: 'chatRoomId' });
+ChatRoom.hasMany(Message, { foreignKey: 'chatRoomId' });
 
 module.exports = { User, ChatRoom, Message, Contact, UserChat };
