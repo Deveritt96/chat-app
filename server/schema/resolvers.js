@@ -1,11 +1,26 @@
+// Import the necessary modules
+import jwt from 'jsonwebtoken';
+import { AuthenticationError } from 'apollo-server';
+import { LogTimings } from 'concurrently';
+import bcrypt from 'bcrypt';
+
+// Define the number of salt rounds
+const saltRounds = 10;
+
+// Define the resolvers
 export const resolvers = {
     Query: {
+        // resolver for getting chat rooms of a user
       getChatRooms: async (_, { userId }, { dataSources }) => {
+        //call the getChatRooms method of the database API
         return await dataSources.database.getChatRooms(userId);
       },
+        // resolver for getting messages of a chat room
       getMessages: async (_, { chatRoomId }, { dataSources }) => {
+        //call the getMessages method of the database API
         return await dataSources.database.getMessages(chatRoomId);
       },
+        // resolver for getting all of the users
       getUsers: async (_, __, { dataSources }) => {
         return await dataSources.database.getUsers();
       },
@@ -29,5 +44,13 @@ export const resolvers = {
         await dataSources.database.addUserToChatRoom(contactId, chatRoomId);
         return true;
       },
+      login: async (_, { username, password }, { dataSources }) => {
+
+        const user = await dataSources.database.login(username, password);
+    
+        const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    
+        return token;
+      },
     },
-  };
+    };

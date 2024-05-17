@@ -1,4 +1,5 @@
 import mysql from 'mysql2/promise';
+import bcrypt from 'bcrypt';
 
 export default class DatabaseAPI {
     constructor() {
@@ -6,11 +7,11 @@ export default class DatabaseAPI {
     }
   
     async init() {
-      this.connection = await mysql.createConnection(process.env.CLEARDB_DATABASE_URL || {
-        host: 'localhost',
-        user: 'root',
-        password: 'Jimin199',
-        database: 'chatroom'
+      this.pool = mysql.createPool({
+        host: process.env.DB_HOST || 'localhost',
+        user: process.env.DB_USER || 'root',
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME || 'chatroom'
       });
     }
 
@@ -29,10 +30,13 @@ export default class DatabaseAPI {
     return rows;
   }
 
-  async addUser(username, hashedPassword) {
+  async addUser(username, password) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+  
     const [result] = await this.connection.execute('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword]);
-    return result.insertId;
-  }
+    
+    return result.insertId; 
+}
 
   async sendMessage(chatRoomId, userId, message) {
     const [result] = await this.connection.execute('INSERT INTO messages (chat_room_id, user_id, message) VALUES (?, ?, ?)', [chatRoomId, userId, message]);
@@ -57,3 +61,25 @@ export default class DatabaseAPI {
     await this.connection.execute('INSERT INTO user_chat_room (user_id, chat_room_id) VALUES (?, ?)', [userId, chatRoomId]);
   }
 }
+
+async login(username, password) {
+    try {
+      const [users] = await this.pool.execute('SELECT * FROM users WHERE username = ?', [username]);
+      const user = users[0];
+
+      if (!user) {
+        throw new Error('Incorrect login credentials');
+      }
+
+      const match = await bcrypt.compare(password, user.password);
+
+      if (!match) {
+        throw new Error('Incorrect login credentials');
+      }
+
+      return user;
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to login');
+    }
+  }
