@@ -1,26 +1,15 @@
-const { Sequelize, DataTypes, Model } = require('sequelize');
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
-
-// Initialize Sequelize
+const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = new Sequelize('chatroom', 'username', 'password', {
   host: 'localhost',
   dialect: 'mysql'
 });
 
-// Define User model
-class User extends Model {
-    // This is a method that we can call on a User instance to check if the provided password hashes to the stored password hash
-    async validPassword(password) {
-      return await bcrypt.compare(password, this.password);
-    }
-  }
-
-User.init({
+const User = sequelize.define('User', {
   id: {
     type: DataTypes.INTEGER.UNSIGNED,
-    autoIncrement: true,
+    allowNull: false,
     primaryKey: true,
+    autoIncrement: true,
   },
   username: {
     type: DataTypes.STRING(45),
@@ -30,78 +19,116 @@ User.init({
   password: {
     type: DataTypes.STRING(255),
     allowNull: false,
-    set(value) {
-        const hash = bcrypt.hashSync(value, saltRounds);
-      this.setDataValue('password', bcrypt.hashSync(value, saltRounds));
-    }
-  },
 }, {
-  sequelize,
-  modelName: 'User',
   tableName: 'users',
-  hooks: {
-    beforeCreate: async (user) => {
-      user.password = await bcrypt.hash(user.password, saltRounds);
-    },
-    beforeUpdate: async (user) => {
-        if (user.changed('password')) {
-            user.password = await bcrypt.hash(user.password, saltRounds);
-            }
-        },
-    },
 });
 
-// Define Message model
-class Message extends Model {}
-
-Message.init({
+const ChatRoom = sequelize.define('ChatRoom', {
   id: {
     type: DataTypes.INTEGER.UNSIGNED,
-    autoIncrement: true,
+    allowNull: false,
     primaryKey: true,
+    autoIncrement: true,
   },
-  user_id: {
+  name: {
+    type: DataTypes.STRING(45),
+    allowNull: true,
+  },
+}, {
+  tableName: 'chat_rooms',
+});
+
+const Message = sequelize.define('Message', {
+  id: {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  chatRoomId: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
+    references: {
+      model: 'chat_rooms',
+      key: 'id',
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  },
+  userId: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id',
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   },
   message: {
     type: DataTypes.TEXT,
     allowNull: false,
-  },
+},
   timestamp: {
     type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: Sequelize.NOW,
+    defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
   },
-}, {
-  sequelize,
-  modelName: 'Message',
   tableName: 'messages',
 });
 
-Message.belongsTo(User, { foreignKey: 'user_id' });
-
-// Define Contact model
-class Contact extends Model {}
-
-Contact.init({
-  user_id: {
+const Contact = sequelize.define('Contact', {
+  userId: {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
     primaryKey: true,
+    references: {
+      model: 'users',
+      key: 'id',
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   },
-  contact_id: {
+  contactId: {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
     primaryKey: true,
+    references: {
+      model: 'users',
+      key: 'id',
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   },
 }, {
-  sequelize,
-  modelName: 'Contact',
   tableName: 'contacts',
 });
 
-Contact.belongsTo(User, { as: 'User', foreignKey: 'user_id' });
-Contact.belongsTo(User, { as: 'Contact', foreignKey: 'contact_id' });
+const UserChat = sequelize.define('UserChat', {
+  userId: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
+    primaryKey: true,
+    references: {
+      model: 'users',
+      key: 'id',
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  },
+  chatRoomId: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
+    primaryKey: true,
+    references: {
+      model: 'chat_rooms',
+      key: 'id',
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  },
+}, {
+  tableName: 'user_chats',
+});
 
-model.exports = { User, Message, Contact };
+module.exports = { User, ChatRoom, Message, Contact, UserChat };
