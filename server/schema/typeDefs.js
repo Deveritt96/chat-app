@@ -1,4 +1,8 @@
-type User {
+import { gql } from 'apollo-server-express';
+
+
+
+const typeDefs= gql`type User {
     id: Int!
     username: String!
 }
@@ -20,9 +24,14 @@ type Message {
 type Query {
     getContacts(user_id: Int!): [User]
     getMessages(user_id: Int!, contact_id: Int!): [Message]
+    getChatRooms(user_id: Int!): [ChatRoom]
+    getUsers: [User]
 }
 
 type Mutation {
     sendMessage(user_id: Int!, contact_id: Int!, message: String!): Message
-    addContacts(user_id: Int!, contact_id: Int!): User
-}
+    addContact(user_id: Int!, contact_id: Int!): User
+    addUser(username: String!, password: String!): User
+}`;
+
+export default typeDefs;

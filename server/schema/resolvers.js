@@ -1,4 +1,4 @@
-const resolvers = {
+export const resolvers = {
     Query: {
       getChatRooms: async (_, { userId }, { dataSources }) => {
         return await dataSources.database.getChatRooms(userId);
