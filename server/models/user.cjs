@@ -24,7 +24,9 @@ const User = sequelize.define('User', {
         args: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/,
         msg: 'Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, and one number',
       }
-},} {
+    }
+  }
+}, {
   tableName: 'users',
 });
 
@@ -42,7 +44,8 @@ const ChatRoom = sequelize.define('ChatRoom', {
   contactId: {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
-}, {
+  }
+}, { // Moved this brace up to close the model fields definition
   tableName: 'chat_rooms',
 });
 
@@ -119,32 +122,32 @@ const Contact = sequelize.define('Contact', {
   tableName: 'contacts',
 });
 
-const UserChat = sequelize.define('UserChat', {
-  userId: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    allowNull: false,
-    primaryKey: true,
-    references: {
-      model: 'users',
-      key: 'id',
-    },
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  },
-  chatRoomId: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    allowNull: false,
-    primaryKey: true,
-    references: {
-      model: 'chat_rooms',
-      key: 'id',
-    },
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  },
-}, {
-  tableName: 'user_chats',
-});
+// const UserChat = sequelize.define('UserChat', {
+//   userId: {
+//     type: DataTypes.INTEGER.UNSIGNED,
+//     allowNull: false,
+//     primaryKey: true,
+//     references: {
+//       model: 'users',
+//       key: 'id',
+//     },
+//     onDelete: 'CASCADE',
+//     onUpdate: 'CASCADE',
+//   },
+//   chatRoomId: {
+//     type: DataTypes.INTEGER.UNSIGNED,
+//     allowNull: false,
+//     primaryKey: true,
+//     references: {
+//       model: 'chat_rooms',
+//       key: 'id',
+//     },
+//     onDelete: 'CASCADE',
+//     onUpdate: 'CASCADE',
+//   },
+// }, {
+//   tableName: 'user_chats',
+// });
 
 // Define the relationships
 Contact.belongsTo(User, { as: 'user1', foreignKey: 'user1Id' });
@@ -161,4 +164,4 @@ User.hasMany(Message, { foreignKey: 'userId' });
 Message.belongsTo(ChatRoom, { foreignKey: 'chatRoomId' });
 ChatRoom.hasMany(Message, { foreignKey: 'chatRoomId' });
 
-module.exports = { User, ChatRoom, Message, Contact, UserChat };
+module.exports = { User, ChatRoom, Message, Contact};

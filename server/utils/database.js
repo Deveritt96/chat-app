@@ -1,4 +1,5 @@
-import mysql from 'mysql2/promise';
+import { Sequelize, Model, DataTypes } from 'sequelize';
+const { User, ChatRoom, Message, Contact} = require('../models/user.cjs');
 import bcrypt from 'bcrypt';
 
 export default class DatabaseAPI {
@@ -7,79 +8,102 @@ export default class DatabaseAPI {
     }
   
     async init() {
-      this.pool = mysql.createPool({
+      this.sequelize = new Sequelize(process.env.DB_NAME || 'chatroom', process.env.DB_USER || 'root', process.env.DB_PASSWORD, {
         host: process.env.DB_HOST || 'localhost',
-        user: process.env.DB_USER || 'root',
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_NAME || 'chatroom'
+        dialect: 'mysql',
       });
     }
 
-  async getChatRooms(userId) {
-    const [rows] = await this.connection.execute('SELECT * FROM chat_rooms WHERE user_id = ?', [userId]);
-    return rows;
-  }
+    async getChatRooms(userId) {
+        return await ChatRoom.findAll({ where: { userId } });
+      }
 
-  async getMessages(chatRoomId) {
-    const [rows] = await this.connection.execute('SELECT * FROM messages WHERE chat_room_id = ?', [chatRoomId]);
-    return rows;
-  }
+      async getMessages(chatRoomId) {
+        return await Message.findAll({ where: { chatRoomId } });
+      }
 
-  async getUsers() {
-    const [rows] = await this.connection.execute('SELECT * FROM users');
-    return rows;
-  }
+      async getUsers() {
+        return await User.findAll();
+      }
 
-  async addUser(username, password) {
-    const hashedPassword = await bcrypt.hash(password, 10);
-  
-    const [result] = await this.connection.execute('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword]);
-    
-    return result.insertId; 
-}
+      async addUser(username, password) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+      
+        const user = await User.create({
+          username,
+          password: hashedPassword
+        });
+      
+        return user.id;
+      }
 
-  async sendMessage(chatRoomId, userId, message) {
-    const [result] = await this.connection.execute('INSERT INTO messages (chat_room_id, user_id, message) VALUES (?, ?, ?)', [chatRoomId, userId, message]);
-    return result.insertId;
-  }
+        async sendMessage(chatRoomId, userId, message) {
+        const sendMessage = await Message.create({
+          chatRoomId,
+          userId,
+          message
+        });
+    }
 
-  async checkContact(userId, contactId) {
-    const [rows] = await this.connection.execute('SELECT * FROM contacts WHERE user1Id = ? AND user2Id = ?', [userId, contactId]);
-    return rows.length > 0;
-  }
+    async checkContact(userId, contactId) {
+        const contact = await Contact.findOne({
+          where: {
+            user1Id: userId,
+            user2Id: contactId
+          }
+        });
+      
+        return contact !== null;
+      }
 
   async addContact(userId, contactId) {
-    await this.connection.execute('INSERT INTO contacts (user1Id, user2Id) VALUES (?, ?)', [userId, contactId]);
+    await Contact.create({
+      user1Id: userId,
+      user2Id: contactId
+    });
   }
 
-  async createChatRoom(userIds) {
-    const [result] = await this.connection.execute('INSERT INTO chat_rooms (user_id) VALUES (?)', [userIds]);
-    return result.insertId;
+  async createChatRoom(user1Id, user2Id) {
+    const chatRoom = await ChatRoom.create({
+      user1Id,
+      user2Id
+    });
+  
+    return chatRoom.id;
   }
 
   async addUserToChatRoom(userId, chatRoomId) {
-    await this.connection.execute('INSERT INTO user_chat_room (user_id, chat_room_id) VALUES (?, ?)', [userId, chatRoomId]);
+    const chatRoom = await ChatRoom.findByPk(chatRoomId);
+  
+    if (!chatRoom.user1Id) {
+      chatRoom.user1Id = userId;
+    } else if (!chatRoom.user2Id) {
+      chatRoom.user2Id = userId;
+    } else {
+      throw new Error('Chat room is already full');
+    }
+  
+    await chatRoom.save();
   }
-}
 
-async login(username, password) {
+  async login(username, password) {
     try {
-      const [users] = await this.pool.execute('SELECT * FROM users WHERE username = ?', [username]);
-      const user = users[0];
-
+      const user = await User.findOne({ where: { username } });
+  
       if (!user) {
         throw new Error('Incorrect login credentials');
       }
-
+  
       const match = await bcrypt.compare(password, user.password);
-
+  
       if (!match) {
         throw new Error('Incorrect login credentials');
       }
-
+  
       return user;
     } catch (err) {
       console.error(err);
       throw new Error('Failed to login');
     }
-  }
+}
+}

@@ -1,4 +1,4 @@
-const { User, ChatRoom, Message, Contact, UserChat } = require('../models/user.js');
+const { User, ChatRoom, Message, Contact, UserChat } = require('../models/user.cjs');
 const bcrypt = require('bcrypt');
 
 async function seedDatabase() {
