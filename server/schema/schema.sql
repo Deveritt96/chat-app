@@ -7,6 +7,7 @@ CREATE TABLE `users` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(45) NOT NULL,
   `password` VARCHAR(255) NOT NULL, -- hashed password
+  `profile_picture` VARCHAR(255) DEFAULT 'https://i.sstatic.net/l60Hf.png',
   PRIMARY KEY (`id`),
   UNIQUE INDEX `username_UNIQUE` (`username` ASC) 
 );

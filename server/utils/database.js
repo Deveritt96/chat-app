@@ -1,5 +1,5 @@
 import { Sequelize, Model, DataTypes } from 'sequelize';
-const { User, ChatRoom, Message, Contact} = require('../models/user.cjs');
+import { User, ChatRoom, Message, Contact } from '../models/user.js';
 import bcrypt from 'bcrypt';
 
 export default class DatabaseAPI {

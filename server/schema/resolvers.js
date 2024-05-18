@@ -34,28 +34,27 @@ export const resolvers = {
         return await dataSources.database.addUser(username, hashedPassword);
       },
         // resolver for sending a message
-      sendMessage: async (_, { chatRoomId, userId, message }, { dataSources }) => {
-        //call the sendMessage method of the database API
-        return await dataSources.database.sendMessage(chatRoomId, userId, message);
-      },
-        // resolver for getting contacts of a user
-      addContact: async (_, { userId, contactId }, { dataSources }) => {
-        //check if the contact already exists
-        const contactExists = await dataSources.database.checkContact(userId, contactId);
-        //throw an error if the contact already exists
-        if (contactExists) {
-          throw new Error('Contact already exists');
-        }
-        //call the addContact method of the database API
-        await dataSources.database.addContact(userId, contactId);
-        //call the createChatRoom method of the database API
-        const chatRoomId = await dataSources.database.createChatRoom([userId, contactId]);
-        //call the addUserToChatRoom method of the database API
-        await dataSources.database.addUserToChatRoom(userId, chatRoomId);
-        //call the addUserToChatRoom method of the database API
-        await dataSources.database.addUserToChatRoom(contactId, chatRoomId);
-        return true;
-      },
+        sendMessage: async (_, { chatRoomId, userId, message }, { dataSources }) => {
+            //call the sendMessage method of the database API
+            return await dataSources.database.sendMessage(chatRoomId, userId, message);
+        },
+        // resolver for adding a contact
+        addContact: async (_, { user1Id, user2Id }, { dataSources }) => {
+            //check if the contact already exists
+            const contactExists = await dataSources.database.checkContact(user1Id, user2Id);
+            if (contactExists) {
+                //throw an error if the contact already exists
+                throw new Error('Contact already exists');
+            }
+            //call the addContact method of the database API
+            await dataSources.database.addContact(user1Id, user2Id);
+            //create a chat room for the users
+            const chatRoomId = await dataSources.database.createChatRoom([user1Id, user2Id]);
+            //add the users to the chat room
+            await dataSources.database.addUserToChatRoom(user1Id, chatRoomId);
+            await dataSources.database.addUserToChatRoom(user2Id, chatRoomId);
+            return true;
+        },
         // resolver for adding a contact
       login: async (_, { username, password }, { dataSources }) => {
         //call the login method of the database API
