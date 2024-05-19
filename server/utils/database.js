@@ -27,18 +27,25 @@ export default class DatabaseAPI {
       }
 
       async addUser(username, password) {
-        const hashedPassword = await bcrypt.hash(password, 10);
+        console.log(`Validating password: ${password}`);
+        const regex = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$');
+        const isValid = password.match(regex);
+        console.log(`Validation result: ${isValid}`);
+        
+        if (!isValid) {
+          throw new Error('Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, and one number');
+        }
       
         const user = await User.create({
           username,
-          password: hashedPassword
+          password
         });
       
-        return user.id;
+        return user; // return the entire user object
       }
 
         async sendMessage(chatRoomId, userId, message) {
-        const sendMessage = await Message.create({
+        const messageCreate = await Message.create({
           chatRoomId,
           userId,
           message

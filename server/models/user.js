@@ -168,32 +168,32 @@ const Message = sequelize.define('Message', {
 });
 
 
-const UserChat = sequelize.define('UserChat', {
-  userId: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    allowNull: false,
-    primaryKey: true,
-    references: {
-      model: 'users',
-      key: 'id',
-    },
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  },
-  chatRoomId: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    allowNull: false,
-    primaryKey: true,
-    references: {
-      model: 'chat_rooms',
-      key: 'id',
-    },
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  },
-}, {
-  tableName: 'user_chats',
-});
+// const UserChat = sequelize.define('UserChat', {
+// //   userId: {
+// //     type: DataTypes.INTEGER.UNSIGNED,
+// //     allowNull: false,
+// //     primaryKey: true,
+// //     references: {
+// //       model: 'users',
+// //       key: 'id',
+// //     },
+// //     onDelete: 'CASCADE',
+// //     onUpdate: 'CASCADE',
+// //   },
+// //   chatRoomId: {
+// //     type: DataTypes.INTEGER.UNSIGNED,
+// //     allowNull: false,
+// //     primaryKey: true,
+// //     references: {
+// //       model: 'chat_rooms',
+// //       key: 'id',
+// //     },
+// //     onDelete: 'CASCADE',
+// //     onUpdate: 'CASCADE',
+// //   },
+// // }, {
+// //   tableName: 'user_chats',
+// // });
 
 // Define the relationships
 Contact.belongsTo(User, { as: 'user1', foreignKey: 'user1Id' });
