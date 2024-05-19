@@ -1,4 +1,4 @@
-import { Sequelize, Model, DataTypes } from 'sequelize';
+import { Sequelize } from 'sequelize';
 import { User, ChatRoom, Message, Contact } from '../models/user.js';
 import bcrypt from 'bcrypt';
 

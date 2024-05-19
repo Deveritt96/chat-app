@@ -2,6 +2,9 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { AuthenticationError } from 'apollo-server-express';
+import DatabaseAPI from '../utils/database.js';
+
+const database = new DatabaseAPI();
 
 // Define the number of salt rounds
 const saltRounds = 10;
@@ -20,11 +23,10 @@ export const resolvers = {
         return await dataSources.database.getMessages(chatRoomId);
       },
         // resolver for getting all of the users
-      getUsers: async (_, __, { dataSources }) => {
-        //call the getUsers method of the database API
-        return await dataSources.database.getUsers();
-      },
-    },
+        getUsers: async () => {
+            return await database.getUsers();
+          },
+        },
     Mutation: {
         // resolver for adding a user
       addUser: async (_, { username, password }, { dataSources }) => {
