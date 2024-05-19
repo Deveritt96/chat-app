@@ -1,6 +1,19 @@
 import { Sequelize, DataTypes } from 'sequelize';
-const sequelize = new Sequelize('chatroom', 'username', 'password', {
-  host: 'localhost',
+import { fileURLToPath } from 'url';
+import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+console.log(process.env.DB_USER);
+console.log(process.env.DB_PASSWORD);
+
+const sequelize = new Sequelize('chatroom', process.env.DB_USER, process.env.DB_PASSWORD, {
+  host: process.env.DB_HOST,
   dialect: 'mysql'
 });
 
@@ -33,6 +46,18 @@ const User = sequelize.define('User', {
   }
 }, {
   tableName: 'users',
+});
+
+User.addHook('beforeCreate', async (user) => {
+  if (user.password && user.password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/)) {
+    user.password = await bcrypt.hash(user.password, 10);
+  }
+});
+
+User.addHook('beforeUpdate', async (user) => {
+  if (user.changed('password') && user.password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/)) {
+    user.password = await bcrypt.hash(user.password, 10);
+  }
 });
 
 const ChatRoom = sequelize.define('ChatRoom', {
@@ -168,5 +193,6 @@ User.hasMany(Message, { foreignKey: 'userId' });
 
 Message.belongsTo(ChatRoom, { foreignKey: 'chatRoomId' });
 ChatRoom.hasMany(Message, { foreignKey: 'chatRoomId' });
+
 
 export { User, ChatRoom, Message, Contact};
