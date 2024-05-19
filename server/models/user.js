@@ -60,6 +60,44 @@ User.addHook('beforeUpdate', async (user) => {
   }
 });
 
+const Contact = sequelize.define('Contact', {
+  userId: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id',
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  },
+  contactId: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id',
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  },
+  user1Id: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
+},
+  user2Id: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
+  },
+  tableName: 'contacts',
+  indexes: [
+    {
+    unique: true,
+    fields: ['userId', 'contactId'],
+    }
+  ]
+});
+
 const ChatRoom = sequelize.define('ChatRoom', {
   id: {
     type: DataTypes.INTEGER.UNSIGNED,
@@ -118,39 +156,6 @@ const Message = sequelize.define('Message', {
   tableName: 'messages',
 });
 
-const Contact = sequelize.define('Contact', {
-  userId: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    allowNull: false,
-    primaryKey: true,
-    references: {
-      model: 'users',
-      key: 'id',
-    },
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  },
-  contactId: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    allowNull: false,
-    primaryKey: true,
-    references: {
-      model: 'users',
-      key: 'id',
-    },
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  },
-  user1Id: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    allowNull: false,
-},
-  user2Id: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    allowNull: false,
-  },
-  tableName: 'contacts',
-});
 
 const UserChat = sequelize.define('UserChat', {
   userId: {
