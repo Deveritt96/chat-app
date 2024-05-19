@@ -28,14 +28,14 @@ async function seedDatabase() {
     contactId: user2.id,
   }, { fields: ['userId', 'contactId',] });
 
-  const createdContact = await Contact.findOne({ where: { userId: user1.id, contactId: user2.id } });
+//   const createdContact = await Contact.findOne({ where: { userId: user1.id, contactId: user2.id } });
   
     // Create a chat room
     const chatRoom = await ChatRoom.create({
-      name: 'chatRoom1',
-      userId: user1.id,
-      contactId: createdContact.id,
-    });
+        name: 'chatRoom1',
+        userId: user1.id,
+        contactId: user2.id,
+      });
   
     // Create a message
     await Message.create({
