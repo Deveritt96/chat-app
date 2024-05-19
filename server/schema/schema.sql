@@ -6,7 +6,7 @@ USE `chatroom`;
 CREATE TABLE `users` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(45) NOT NULL,
-  `password` VARCHAR(255) NOT NULL, -- hashed password
+  `password` VARCHAR(255) NOT NULL,
   `profile_picture` VARCHAR(255) DEFAULT 'https://i.sstatic.net/l60Hf.png',
   `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -17,48 +17,51 @@ CREATE TABLE `users` (
 CREATE TABLE `contacts` (
   `userId` INT UNSIGNED NOT NULL,
   `contactId` INT UNSIGNED NOT NULL,
-  `user1Id` INT UNSIGNED NOT NULL,
-  `user2Id` INT UNSIGNED NOT NULL,
   `createdAt` DATETIME NOT NULL,
   `updatedAt` DATETIME NOT NULL,
-  PRIMARY KEY (`user1Id`, `user2Id`),
-  INDEX `fk_contacts_users1_idx` (`user1Id` ASC),
-  INDEX `fk_contacts_users2_idx` (`user2Id` ASC),
+  INDEX `fk_contacts_users1_idx` (`userId` ASC),
+  INDEX `fk_contacts_users2_idx` (`contactId` ASC),
   CONSTRAINT `fk_contacts_users1`
-    FOREIGN KEY (`user1Id`)
+    FOREIGN KEY (`userId`)
     REFERENCES `users` (`id`)
     ON DELETE CASCADE,
   CONSTRAINT `fk_contacts_users2`
-    FOREIGN KEY (`user2Id`)
+    FOREIGN KEY (`contactId`)
     REFERENCES `users` (`id`)
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+  UNIQUE INDEX `contact_relation_UNIQUE` (`userId`, `contactId`)
 );
 
 CREATE TABLE `chat_rooms` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NULL,
-  `user1Id` INT UNSIGNED NOT NULL,
-  `user2Id` INT UNSIGNED NOT NULL,
-   `createdAt` DATETIME NOT NULL,
+  `userId` INT UNSIGNED NOT NULL,
+  `contactId` INT UNSIGNED NOT NULL,
+  `createdAt` DATETIME NOT NULL,
   `updatedAt` DATETIME NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_chat_rooms_contacts_idx` (`user1Id` ASC, `user2Id` ASC),
-  CONSTRAINT `fk_chat_rooms_contacts`
-    FOREIGN KEY (`user1Id`, `user2Id`)
-    REFERENCES `contacts` (`user1Id`, `user2Id`)
+  INDEX `fk_chat_rooms_contacts1_idx` (`userId`, `contactId` ASC),
+  CONSTRAINT `fk_chat_rooms_contacts1`
+    FOREIGN KEY (`userId`, `contactId`)
+    REFERENCES `contacts` (`userId`, `contactId`)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE `messages` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `chat_room_id` INT UNSIGNED NOT NULL,
-  `user_id` INT UNSIGNED NOT NULL,
+  `chatRoomId` INT UNSIGNED NOT NULL,
+  `userId` INT UNSIGNED NOT NULL,
   `message` TEXT NOT NULL,
-  `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `timestamp` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  INDEX `fk_messages_chat_rooms_idx` (`chat_room_id` ASC),
-  INDEX `fk_messages_users_idx` (`user_id` ASC),
-  CONSTRAINT `fk_messages_chat_rooms`
-    FOREIGN KEY (`chat_room_id`)
+  INDEX `fk_messages_chat_rooms1_idx` (`chatRoomId` ASC),
+  INDEX `fk_messages_users1_idx` (`userId` ASC),
+  CONSTRAINT `fk_messages_chat_rooms1`
+    FOREIGN KEY (`chatRoomId`)
     REFERENCES `chat_rooms` (`id`)
+    ON DELETE CASCADE,
+  CONSTRAINT `fk_messages_users1`
+    FOREIGN KEY (`userId`)
+    REFERENCES `users` (`id`)
     ON DELETE CASCADE
 );

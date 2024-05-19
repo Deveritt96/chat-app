@@ -81,14 +81,7 @@ const Contact = sequelize.define('Contact', {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   },
-  user1Id: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    allowNull: false,
-},
-  user2Id: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    allowNull: false,
-  },
+}, {
   tableName: 'contacts',
   indexes: [
     {
@@ -109,10 +102,26 @@ const ChatRoom = sequelize.define('ChatRoom', {
     type: DataTypes.STRING(45),
     allowNull: true,
   },
+  userId: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
+    references: {
+      model: 'contacts',
+      key: 'userId',
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  },
   contactId: {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
-  }
+    references: {
+      model: 'contacts',
+      key: 'contactId',
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  },
 }, {
   tableName: 'chat_rooms',
 });

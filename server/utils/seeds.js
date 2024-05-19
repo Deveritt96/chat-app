@@ -22,18 +22,19 @@ async function seedDatabase() {
       profile_picture: 'https://i.sstatic.net/l60Hf.png',
     });
   
-    // Create a contact
-    const contact = await Contact.create({
-      userId: user1.id,
-      contactId: user2.id,
-      user1Id: user1.id,
-      user2Id: user2.id,
-    });
+   // Create a contact
+   const contact = await Contact.create({
+    userId: user1.id,
+    contactId: user2.id,
+  }, { fields: ['userId', 'contactId',] });
+
+  const createdContact = await Contact.findOne({ where: { userId: user1.id, contactId: user2.id } });
   
     // Create a chat room
     const chatRoom = await ChatRoom.create({
       name: 'chatRoom1',
-      contactId: contact.id,
+      userId: user1.id,
+      contactId: createdContact.id,
     });
   
     // Create a message
