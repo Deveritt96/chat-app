@@ -5,6 +5,7 @@ import { gql } from 'apollo-server-express';
 const typeDefs= gql`type User {
     id: Int!
     username: String!
+    password: String!
     profile_picture: String
     contacts: [Contact]
     messages: [Message]

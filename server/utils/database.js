@@ -15,6 +15,7 @@ export default class DatabaseAPI {
     }
 
     async getChatRooms(userId) {
+      console.log(userId);
         return await ChatRoom.findAll({ where: { userId } });
       }
 
@@ -45,7 +46,7 @@ export default class DatabaseAPI {
       }
 
         async sendMessage(chatRoomId, userId, message) {
-        const messageCreate = await Message.create({
+         await Message.create({
           chatRoomId,
           userId,
           message

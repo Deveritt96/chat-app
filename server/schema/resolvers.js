@@ -5,9 +5,6 @@ import DatabaseAPI from '../utils/database.js';
 
 const database = new DatabaseAPI();
 
-// Define the number of salt rounds
-const saltRounds = 10;
-
 // Define the resolvers
 export const resolvers = {
     Query: {

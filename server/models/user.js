@@ -9,9 +9,6 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-console.log(process.env.DB_USER);
-console.log(process.env.DB_PASSWORD);
-
 const sequelize = new Sequelize('chatroom', process.env.DB_USER, process.env.DB_PASSWORD, {
   host: process.env.DB_HOST,
   dialect: 'mysql'
